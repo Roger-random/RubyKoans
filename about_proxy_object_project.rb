@@ -15,10 +15,35 @@ require File.expand_path(File.dirname(__FILE__) + '/neo')
 class Proxy
   def initialize(target_object)
     @object = target_object
-    # ADD MORE CODE HERE
+    @messages = Array.new
   end
 
-  # WRITE CODE HERE
+  def method_missing(method_name, *args, &block)
+    @messages << method_name.to_sym
+
+    # This if/else/end block looks like a hack. What's the "right way" here?
+    if args.length==0
+      ret = @object.send(method_name)
+    else
+      ret = @object.send(method_name, args[0])
+    end
+  end
+
+  def respond_to?(method_name)
+    @object.respond_to?(method_name)
+  end
+
+  def messages
+    @messages
+  end
+
+  def called?(method_name)
+    0 < number_of_times_called(method_name)
+  end
+
+  def number_of_times_called(method_name)
+    @messages.count(method_name)
+  end
 end
 
 # The proxy object should pass the following Koan:
